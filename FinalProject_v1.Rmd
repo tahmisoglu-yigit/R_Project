@@ -1,0 +1,39 @@
+---
+title: 'Final Project'
+author: "Yigit Tahmisoglu"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Github repository
+https://github.com/tahmisoglu-yigit/R_Project.git
+
+## Dataset
+
+```{r}
+#tinytex::install_tinytex()
+data <- read.csv("C:/Users/YIGIT/R/TRIR71.csv")
+
+
+```
+
+## Description of dataset
+
+The data set is the one I plan to use for my masters thesis.*(They say not to share the dataset with someone else, but I don't think there will be an issue to share with you.)*
+It is a cross-sectional survey data from the Demographic and Health Surveys for Turkey from the year 2018, which is a representative household  survey providing detailed information on birth recodes and individual records for women of each household for developing countries. 
+
+The potential questions I am interested in exploring are:
+
+-   Effect of childbirth on female labor force participation
+
+-   Effect of living conditions on early childhood development
+
+-   And additional ones I might discover along the way
+
+
