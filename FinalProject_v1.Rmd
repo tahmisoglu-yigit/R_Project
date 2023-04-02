@@ -21,58 +21,94 @@ Requirements:
 ## Summary of the raw data set
 
 The data set is the one I plan to use for my masters thesis.
-It is a cross-sectional survey data from the Demographic and Health Surveys for Turkey from the year 2018, which is a representative household  survey providing detailed information on birth recodes and individual records for women of each household for developing countries. 
-The potential questions I am interested in exploring are:
--   Effect of childbirth on female labor force participation
+It is a cross-sectional survey data from the Demographic and Health Surveys for Turkey from the year 2018, which is a representative household  survey providing detailed information on birth recodes and individual records for women of each household for developing countries. The program conducted its first survey in Turkey in 1993 and it has been conducted once in every five years. The dataset provides nationally representative individual and household level categorical data on household characteristics, living conditions, respondent background characteristics (e.g. fertility rates, education levels, child mortality rates, employment status), child health, family planning, domestic violence to name but a few.
+In this analysis, I will try to show the relationship between age at first childbirth and different variables such as education, type of residence, parental education, employment status, consent for marriage etc.
 
-## Explain how you cleaned the data, or if it was clean, how you ensured that it was. Clearly mention any R scripts that did the checking. (It should be automated, that means no "I printed it a few times to the screen and stared at it.") (1-2 pages, less if data was clean) :
+# Explain how you cleaned the data, or if it was clean, how you ensured that it was. Clearly mention any R scripts that did the checking. (It should be automated, that means no "I printed it a few times to the screen and stared at it.") (1-2 pages, less if data was clean) :
 
 Install libraries:
 ```{r include=FALSE}
-
+install.packages("rio")
 library(rio)
 library(dplyr)
 library(tidyverse)
-
+library(ggplot2)
 ```
 
+## Opening the dataset
 ```{r include=FALSE}
 dropbox <- "https://www.dropbox.com/s/zemcx6rqxsxu9ht/TRIR71.csv?dl=1"
 df <- import(dropbox, format = "csv")
-# Voila
 
-# View(df)
-# ls(df)
-# sapply(df, mean, na.rm=TRUE)
-# summary(df)
 ```
 
-Variable names are not descriptive. But taking the DHS Manual as reference, we  can rename the variable of interests to make further analyses easier.
+### Variable names are not descriptive. But taking the DHS Manual as reference, we  can rename the variable of interests to make further analyses easier.
 
-```{r include=FALSE}
-df <- df |>
+```{r echo=TRUE}
+df1 <- df |>
   rename(birth_month=V009,
          birth_year=V010,
          age = V012,
+         region = V024,
          residence = V025,
          residence_childhood=V103,
          educ_level=V106,
          religion=V130,
-         
+         educ = V133,
+         age_at_birth = V212,
+         educ_mother = S119,
+         educ_father = S121
          )
+# mean(df1$age_at_birth, na.rm = TRUE)
+
+# Feature engineering
+df1$region <- recode(df1$region, 
+                    "1" = "west", 
+                    "2" = "south", 
+                    "3" = "central", 
+                    "4" = "north", 
+                    "5" = "east")
+df1$educ_level <- recode(df1$educ_level,
+                    "1" = "no educ", 
+                    "2" = "primary", 
+                    "3" = "secondary", 
+                    "4" = "higher")
+df1$residence <- recode(df1$residence,
+                    "1" = "urban", 
+                    "2" = "rural")
+
+
+
+
+
 ```
 
-Also rename unique values of categorical variables:
+# Plotting the relationships:
+
+```{r echo=TRUE}
+by_age_at_birth <- group_by(df1, age_at_birth)
+avg_educ_by_age_at_first_birth <- summarise(
+  by_age_at_birth,
+  avgeduc = mean(educ, na.rm = TRUE))
+# Bin age to 5 year groups
+avg_educ_by_age_at_first_birth$age_group <- cut(avg_educ_by_age_at_first_birth$age_at_birth, 
+                                                breaks = seq(15, 49, by = 5), na.rm = TRUE)
+
+# Plot education and age at first birth
+(ggplot(data = avg_educ_by_age_at_first_birth,
+        mapping = aes(y = avgeduc, x = age_group)) +
+        geom_point() +
+        labs(x = "Age at first birth", y = "Average education (in years)")
+)
+ggsave("educ_age.png", plot = p, width = 6, height = 4, dpi = 300)
+
+
+```
+
 
 ```{r include=FALSE}
-unique(df$residence)
-df$residence <- ifelse(df$residence == "1", "Urban", "Rural")
-
-
+rmarkdown::render("FinalProject_v1.Rmd", output_format = "pdf_document")
 
 ```
-
-
-
 
 
