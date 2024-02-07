@@ -238,35 +238,32 @@ ggsave("region_birthage.png", dpi = 300)
 ## Regression results:
 Models show positive significant relationship between years of education and age at first birth. As we add more controls, R-squared value improve slightly.
 
+
+```{r echo=FALSE , message=FALSE, warning=FALSE, include = TRUE}
+
+library(gridExtra)
+
+model1 <- lm(age_at_birth ~ educ, data = df1sub)
+coefficients_df1 <- as.data.frame(summary(model1)$coefficients)
+
+
+model2 <- lm(age_at_birth ~ educ + wealthindex + region + residence, data = df1sub)
+coefficients_df2 <- as.data.frame(summary(model2)$coefficients)
+
+table_png <- function(df, filename) {
+  png(filename, width = 800, height = 600)
+  grid.table(df)
+  dev.off()
+}
+
+table_png(coefficients_df1, "model1.png")
+table_png(coefficients_df2, "model2.png")
+
+```
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE, include = TRUE}
 knitr::include_graphics("model1.png")
 knitr::include_graphics("model2.png")
 
 ```
 
-```{undefined echo=FALSE}
-model1 <- lm(age_at_birth ~ educ, data = df1sub)
-summary(model1)
-model2 <- lm(age_at_birth ~ educ + wealthindex + region + residence, data = df1sub)
-summary(model2)
-```
-
-## 6. Explain part of code: 
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, include = TRUE}
-knitr::include_graphics("code.png")
-```
-
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-
-df2 <- df1sub |>
-  group_by(educ_level) |> # group individuals by their level of education
-  summarize(avg_age = mean(age_at_birth, na.rm=TRUE)) |> # take average age at first birth per level of education
-  ungroup() |> # pipeline to generate plot
-  ggplot(mapping = aes(x = reorder(educ_level, avg_age), y = avg_age)) + # sort in ascending order
-    geom_col(fill = "blue") +
-    xlab("Education") + #labelling
-    ylab("Average Age at First Birth") +
-    ggtitle("Average Age at First Birth by Education") # adding title
-```
